@@ -1,0 +1,37 @@
+{
+  "StartAt": "Bronze",
+  "States": {
+    "Bronze": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "bronze_orders_ingest"
+      },
+      "Next": "Silver"
+    },
+    "Silver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "silver_orders_transform"
+      },
+      "Next": "Gold"
+    },
+    "Gold": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "gold_order_metrics"
+      },
+      "Next": "DQ"
+    },
+    "DQ": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "dq_checks"
+      },
+      "End": true
+    }
+  }
+}
