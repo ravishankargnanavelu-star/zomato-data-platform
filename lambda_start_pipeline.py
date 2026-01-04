@@ -1,0 +1,31 @@
+import json
+import boto3
+
+sf = boto3.client("stepfunctions")
+
+STATE_MACHINE_ARN = "arn:aws:states:ap-south-1:123456789012:stateMachine:zomato-etl-pipeline"
+
+def lambda_handler(event, context):
+    # Extract S3 details from EventBridge event
+    bucket = event["detail"]["bucket"]["name"]
+    key = event["detail"]["object"]["key"]
+
+    # Only trigger for orders data
+    if not key.startswith("orders/"):
+        return {"status": "ignored"}
+
+    input_payload = {
+        "source_bucket": bucket,
+        "source_key": key,
+        "dataset": "orders"
+    }
+
+    response = sf.start_execution(
+        stateMachineArn=STATE_MACHINE_ARN,
+        input=json.dumps(input_payload)
+    )
+
+    return {
+        "status": "started",
+        "executionArn": response["executionArn"]
+    }
