@@ -18,5 +18,3 @@ df = (
 )
 
 df.write.mode("append").parquet(args["TARGET_PATH"])
-
-spark.stop()
